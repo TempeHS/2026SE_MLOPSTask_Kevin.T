@@ -1,0 +1,28 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container">
+  <div class="row">
+    <h1>Two-Factor Authentication</h1>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <h1>Scan this QR Code with Google Authenticator</h1>
+    </div>
+    <div class="col">
+      <img src="data:image/png;base64,{{ qr_code }}" />
+    </div>
+  </div>
+
+  <form action="/auth.html" method="POST">
+    <div class="form-group">
+      <label for="otp">Enter the OTP from your app:</label>
+      <input type="text" id="otp" name="otp" class="form-control" />
+      <input type="submit" value="Verify" class="btn btn-primary" />
+    </div>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  </form>
+  {% if error_message %}
+  <div class="alert alert-warning" role="alert">{{ error_message }}</div>
+  {% endif %}
+</div>
+{% endblock %}

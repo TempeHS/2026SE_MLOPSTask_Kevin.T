@@ -1,0 +1,111 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container">
+  <div class="row">
+    <h1>Add a developer log</h1>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <form action="/form.html" method="POST" class="box">
+      <div class="row">
+        <div class="col">
+          <label class="form-label">Developer</label>
+          <input
+            name="developer"
+            type="text"
+            class="form-control"
+            placeholder="Ben Jones"
+            required
+          />
+        </div>
+
+        <div class="col">
+          <label class="form-label">Project</label>
+          <input name="project" type="text" class="form-control" required />
+        </div>
+      </div>
+      <br />
+
+      <div class="row">
+        <div class="col">
+          <label class="form-label">Start time</label>
+          <input
+            name="start_time"
+            type="datetime-local"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="col">
+          <label class="form-label">End time</label>
+          <input
+            name="end_time"
+            type="datetime-local"
+            class="form-control"
+            required
+          />
+        </div>
+      </div>
+      <br />
+
+      <div class="row">
+        <div class="col">
+          <label class="form-label">Diary entry time</label>
+          <input
+            name="entry_time"
+            type="datetime-local"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <div class="col">
+          <label class="form-label">Time worked on</label>
+          <input
+            name="time_worked"
+            type="text"
+            class="form-control"
+            placeholder="_ hours"
+            required
+          />
+        </div>
+      </div>
+      <br />
+
+      <div class="row">
+        <div class="col">
+          <label class="form-label">Repository</label>
+          <input
+            name="repo"
+            type="url"
+            class="form-control"
+            placeholder="https://"
+            required
+          />
+        </div>
+      </div>
+      <br />
+
+      <div class="row">
+        <div class="col">
+          <label class="form-label">Developer notes</label>
+          <textarea class="form-control" name="notes" rows="3"></textarea>
+        </div>
+      </div>
+
+      <br />
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary mb-3">Submit</button>
+      </div>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    </form>
+  </div>
+  <div class="row">
+    <div class="col">
+      <a href="/logs.html" class="btn btn-primary mb-3">View logs</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
