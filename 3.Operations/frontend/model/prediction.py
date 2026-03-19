@@ -1,47 +1,11 @@
-# # import pickle
-# # import numpy as np
-
-# # poly_path = "my_saved_poly_v3.pkl"
-# # filename = "my_saved_model_v3.sav"
-
-# # # [start, manu_avg_fin, manu_avg_fin_track, manu_track_delta, avg_fin_track]
-# # x = np.array([[0.103, 0.558, 0.280, 0.473, 0.0]], dtype=float)
-
-# # loaded_model = pickle.load(open(filename, "rb"))
-# # poly = pickle.load(poly_path)
-# # x_poly = poly.transform(x)
-# # result = loaded_model.predict(x_poly)
-# # print(result[0])
-
-# import pickle
-# import numpy as np
-
-# poly_path = "my_saved_poly_v3.pkl"
-# model_path = "my_saved_model_v3.sav"
-
-# with open(poly_path, "rb") as f:
-#     poly = pickle.load(f)
-
-# with open(model_path, "rb") as f:
-#     model = pickle.load(f)
-
-# # [start, manu_avg_fin, manu_avg_fin_track, manu_track_delta, avg_fin_track]
-# x = np.array([[0.103, 0.558, 0.280, 0.473, 0.0]], dtype=float)
-
-# x_poly = poly.transform(x)  # not fit_transform
-# result = model.predict(x_poly)
-
-# print(float(result[0]))
-
-
 import pickle
 import numpy as np
 import pandas as pd
 from pathlib import Path
 
-poly_path = "my_saved_poly_v3.pkl"
-model_path = "my_saved_model_v3.sav"
-scaler_path = "my_saved_scaler.pkl"
+poly_path = "model/my_saved_poly_v3.pkl"
+model_path = "model/my_saved_model_v3.sav"
+scaler_path = "model/my_saved_scaler.pkl"
 
 with open(poly_path, "rb") as f:
     poly = pickle.load(f)
@@ -51,9 +15,7 @@ with open(scaler_path, "rb") as f:
     scaler = pickle.load(f)
 
 # Build lookup tables from raw data
-df = pd.read_csv(
-    "/workspaces/2026SE_MLOPSTask_Kevin.T/2.Model_Development/2.1.Data_Wrangling/NASCAR 2017-2024 Full Race  Points Data - Cup.csv"
-)
+df = pd.read_csv("model/NASCAR 2017-2024 Full Race  Points Data - Cup.csv")
 
 manu_avg_fin_track_lookup = df.groupby(["manu", "track"])["fin"].mean()
 manu_avg_fin_lookup = df.groupby("manu")["fin"].mean()
@@ -110,12 +72,3 @@ def predict(manufacturer: str, track: str, start: int) -> float:
     predicted_finish = result[0] * (fin_max - fin_min) + fin_min
 
     return round(predicted_finish, 1)
-
-
-# --- Test it ---
-manufacturer = "Toyota"
-track = "Atlanta"
-start = 30
-
-prediction = predict(manufacturer, track, start)
-print(f"{manufacturer} starting P{start} at {track} → predicted finish: P{prediction}")

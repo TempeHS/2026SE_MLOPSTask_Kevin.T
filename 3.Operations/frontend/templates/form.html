@@ -1,109 +1,228 @@
 {% extends 'layout.html' %} {% block content %}
 <div class="container">
   <div class="row">
-    <h1>Add a developer log</h1>
+    <h1>NASCAR Finishing Prediction Service</h1>
   </div>
 </div>
+
 <div class="container">
   <div class="row">
-    <form action="/form.html" method="POST" class="box">
-      <div class="row">
-        <div class="col">
-          <label class="form-label">Developer</label>
-          <input
-            name="developer"
-            type="text"
-            class="form-control"
-            placeholder="Ben Jones"
-            required
-          />
-        </div>
-
-        <div class="col">
-          <label class="form-label">Project</label>
-          <input name="project" type="text" class="form-control" required />
-        </div>
-      </div>
-      <br />
-
-      <div class="row">
-        <div class="col">
-          <label class="form-label">Start time</label>
-          <input
-            name="start_time"
-            type="datetime-local"
-            class="form-control"
-            required
-          />
-        </div>
-
-        <div class="col">
-          <label class="form-label">End time</label>
-          <input
-            name="end_time"
-            type="datetime-local"
-            class="form-control"
-            required
-          />
-        </div>
-      </div>
-      <br />
-
-      <div class="row">
-        <div class="col">
-          <label class="form-label">Diary entry time</label>
-          <input
-            name="entry_time"
-            type="datetime-local"
-            class="form-control"
-            required
-          />
-        </div>
-
-        <div class="col">
-          <label class="form-label">Time worked on</label>
-          <input
-            name="time_worked"
-            type="text"
-            class="form-control"
-            placeholder="_ hours"
-            required
-          />
-        </div>
-      </div>
-      <br />
-
-      <div class="row">
-        <div class="col">
-          <label class="form-label">Repository</label>
-          <input
-            name="repo"
-            type="url"
-            class="form-control"
-            placeholder="https://"
-            required
-          />
-        </div>
-      </div>
-      <br />
-
-      <div class="row">
-        <div class="col">
-          <label class="form-label">Developer notes</label>
-          <textarea class="form-control" name="notes" rows="3"></textarea>
-        </div>
-      </div>
-
-      <br />
-      <div class="col-auto">
-        <button type="submit" class="btn btn-primary mb-3">Submit</button>
-      </div>
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    </form>
-  </div>
-  <div class="row">
     <div class="col">
-      <a href="/logs.html" class="btn btn-primary mb-3">View logs</a>
+      <form action="/form.html" method="POST" class="box">
+        <div class="mb-3">
+          <label for="manufacturer" class="form-label">Manufacturer</label>
+          <select
+            class="form-select"
+            id="manufacturer"
+            name="manufacturer"
+            required
+          >
+            <option value="">Select Manufacturer</option>
+            <option value="Toyota">Toyota</option>
+            <option value="Ford">Ford</option>
+            <option value="Chevrolet">Chevrolet</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="track" class="form-label">Track</label>
+          <select class="form-select" id="track" name="track" required>
+            <option value="">Select Track</option>
+            <option value="Daytona">Daytona</option>
+            <option value="Atlanta">Atlanta</option>
+            <option value="Las Vegas">Las Vegas</option>
+            <option value="Phoenix">Phoenix</option>
+            <option value="Auto Club">Auto Club</option>
+            <option value="Martinsville">Martinsville</option>
+            <option value="Texas">Texas</option>
+            <option value="Bristol">Bristol</option>
+            <option value="Richmond">Richmond</option>
+            <option value="Talladega">Talladega</option>
+            <option value="Kansas">Kansas</option>
+            <option value="Charlotte">Charlotte</option>
+            <option value="Dover">Dover</option>
+            <option value="Pocono">Pocono</option>
+            <option value="Michigan">Michigan</option>
+            <option value="Sonoma">Sonoma</option>
+            <option value="Kentucky">Kentucky</option>
+            <option value="New Hampshire">New Hampshire</option>
+            <option value="Indianapolis">Indianapolis</option>
+            <option value="Watkins Glen">Watkins Glen</option>
+            <option value="Darlington">Darlington</option>
+            <option value="Chicagoland">Chicagoland</option>
+            <option value="Homestead">Homestead</option>
+            <option value="Charlotte Roval">Charlotte Roval</option>
+            <option value="Daytona Road Course">Daytona Road Course</option>
+            <option value="Bristol Dirt">Bristol Dirt</option>
+            <option value="COTA">COTA</option>
+            <option value="Nashville">Nashville</option>
+            <option value="Road America">Road America</option>
+            <option value="Indianapolis Road Course">
+              Indianapolis Road Course
+            </option>
+            <option value="Gateway">Gateway</option>
+            <option value="Chicago Street Course">Chicago Street Course</option>
+            <option value="Iowa">Iowa</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="start" class="form-label">Starting Position</label>
+          <input
+            type="number"
+            class="form-control"
+            id="start"
+            name="start"
+            min="1"
+            max="40"
+            placeholder="1-40"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Predict Finish Position
+        </button>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      </form>
+    </div>
+    <div class="col-md-6">
+      {% if error_message %}
+      <div class="alert alert-warning" role="alert">{{ error_message }}</div>
+      {% endif %} {% if prediction_result is not none %} {% set total_positions
+      = 40 %} {% set score = ((total_positions - prediction_result + 1) /
+      total_positions * 100) | round(1) %} {% set marker_pct =
+      ((prediction_result - 1) / (total_positions - 1) * 100) | round(2) %}
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Prediction Output</h5>
+          <p class="card-text">
+            Predicted finish: <strong>P{{ prediction_result }}</strong>
+          </p>
+
+          <p class="mb-2">
+            <small
+              >{{ manufacturer }}, {{ track }}, Qualified {{ start }}</small
+            >
+          </p>
+          <svg
+            viewBox="0 0 520 110"
+            width="100%"
+            role="img"
+            aria-label="Predicted finish graph"
+          >
+            <!-- axes -->
+            <line
+              x1="20"
+              y1="90"
+              x2="500"
+              y2="90"
+              stroke="#6c757d"
+              stroke-width="2"
+            ></line>
+            <line
+              x1="20"
+              y1="20"
+              x2="20"
+              y2="90"
+              stroke="#6c757d"
+              stroke-width="2"
+            ></line>
+
+            <!-- model curve -->
+            {% if curve_points %}
+            <polyline
+              points="{{ curve_points }}"
+              fill="none"
+              stroke="#0d6efd"
+              stroke-width="2"
+            ></polyline>
+            {% endif %}
+
+            <!-- selected prediction marker -->
+            <circle
+              cx="{{ 20 + ((start - 1) / 39 * 480) }}"
+              cy="{{ 90 - ((prediction_result - 1) / 39 * 70) }}"
+              r="5"
+              fill="#dc3545"
+            ></circle>
+
+            <!-- labels -->
+            <text x="20" y="105" font-size="12" fill="#6c757d">Start P1</text>
+            <text x="455" y="105" font-size="12" fill="#6c757d">Start P40</text>
+            <text x="26" y="24" font-size="12" fill="#6c757d">Finish P1</text>
+            <text x="26" y="88" font-size="12" fill="#6c757d">Finish P40</text>
+          </svg>
+
+          <small class="text-muted d-block mb-2">
+            Blue line = model output across all starts, red dot = your selected
+            start
+          </small>
+
+          {% if curve_warning %}
+          <small class="text-warning d-block mb-2">{{ curve_warning }}</small>
+          {% endif %}
+
+          <div
+            style="
+              background: #e9ecef;
+              height: 24px;
+              border-radius: 6px;
+              overflow: hidden;
+            "
+          >
+            <div
+              style="height:100%; width: {{ score }}%; background:#198754;"
+              aria-label="prediction-score"
+              title="Performance score {{ score }}%"
+            ></div>
+          </div>
+          <small class="text-muted">Score: {{ score }}%</small>
+        </div>
+      </div>
+
+      {% else %}
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Prediction Output</h5>
+          <p class="card-text text-muted">No prediction yet.</p>
+
+          <p class="mb-2"><small class="text-muted">Graph</small></p>
+          <svg
+            viewBox="0 0 520 110"
+            width="100%"
+            role="img"
+            aria-label="Prediction graph placeholder"
+          >
+            <line
+              x1="20"
+              y1="90"
+              x2="500"
+              y2="90"
+              stroke="#adb5bd"
+              stroke-width="2"
+            ></line>
+            <line
+              x1="20"
+              y1="20"
+              x2="20"
+              y2="90"
+              stroke="#adb5bd"
+              stroke-width="2"
+            ></line>
+            <text x="175" y="58" font-size="13" fill="#6c757d">
+              Submit inputs to generate graph
+            </text>
+            <text x="20" y="105" font-size="12" fill="#6c757d">Start P1</text>
+            <text x="455" y="105" font-size="12" fill="#6c757d">Start P40</text>
+            <text x="26" y="24" font-size="12" fill="#6c757d">Finish P1</text>
+            <text x="26" y="88" font-size="12" fill="#6c757d">Finish P40</text>
+          </svg>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>

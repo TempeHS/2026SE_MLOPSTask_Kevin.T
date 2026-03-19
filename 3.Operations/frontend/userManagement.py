@@ -1,5 +1,6 @@
 import sqlite3 as sql
 import bcrypt
+import pyotp
 
 
 ### example
@@ -16,9 +17,10 @@ def insertUser(email, password):
     cur = con.cursor()
     try:
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        totp_secret = pyotp.random_base32()
         cur.execute(
-            "INSERT INTO users (email,password) VALUES (?,?)",
-            (email, hashed.decode("utf-8")),
+            "INSERT INTO users (email,password,totp_secret) VALUES (?,?,?)",
+            (email, hashed.decode("utf-8"), totp_secret),
         )
         con.commit()
         con.close()
@@ -42,3 +44,14 @@ def verifyUser(email, password):
             return (True, "Signed in")
         else:
             return (False, "Wrong password")
+
+
+def getUserSecret(email):
+    con = sql.connect("databaseFiles/database.db")
+    cur = con.cursor()
+    cur.execute("SELECT totp_secret FROM users WHERE email = ?", (email,))
+    row = cur.fetchone()
+    con.close()
+    if row:
+        return row[0]
+    return None

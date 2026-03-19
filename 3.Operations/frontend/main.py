@@ -18,8 +18,8 @@ import pyqrcode
 import base64
 from io import BytesIO
 
-# Code snippet for logging a message
-# app.logger.critical("message")
+# model stuff
+from model.prediction import predict
 
 app_log = logging.getLogger(__name__)
 logging.basicConfig(
@@ -82,7 +82,7 @@ def index():
             session["email"] = email
 
             # 2fa secret
-            user_secret = pyotp.random_base32()
+            user_secret = dbHandler.getUserSecret(email)
             session["user_secret"] = user_secret
             app.logger.info(f"User {email} logged in successfully")
             return redirect("/auth.html")
@@ -108,31 +108,44 @@ def form():
     if not (session.get("logged_in") and session.get("authenticated")):
         return redirect("/")
 
-    if request.method == "POST":
-        developer = request.form["developer"]
-        project = request.form["project"]
-        start_time = request.form["start_time"]
-        end_time = request.form["end_time"]
-        entry_time = request.form["entry_time"]
-        time_worked = request.form["time_worked"]
-        repo = request.form["repo"]
-        notes = request.form["notes"]
-        success, message = logHandler.insertLog(
-            developer,
-            project,
-            start_time,
-            end_time,
-            entry_time,
-            time_worked,
-            repo,
-            notes,
-        )
+    prediction_result = None
+    curve_points = None
+    error_message = None
+    curve_warning = None
 
-        return render_template(
-            "/form.html", is_done=True, error_message=None if success else message
-        )
-    else:
-        return render_template("/form.html", error_message=None)
+    manufacturer = ""
+    track = ""
+    start = ""
+
+    if request.method == "POST":
+        manufacturer = request.form.get("manufacturer", "").strip()
+        track = request.form.get("track", "").strip()
+        start_raw = request.form.get("start", "").strip()
+
+        try:
+            start = int(start_raw)
+            prediction_result = int(round(float(predict(manufacturer, track, start))))
+            prediction_result = max(1, min(40, prediction_result))
+        except Exception:
+            error_message = "Prediction failed. Check inputs."
+            prediction_result = None
+
+        # Build curve only if main prediction worked
+        if prediction_result is not None:
+            curve_points = _build_curve_points(manufacturer, track)
+            if not curve_points:
+                curve_warning = "Model curve unavailable for this selection."
+
+    return render_template(
+        "form.html",
+        prediction_result=prediction_result,
+        curve_points=curve_points,
+        error_message=error_message,
+        curve_warning=curve_warning,
+        manufacturer=manufacturer,
+        track=track,
+        start=start,
+    )
 
 
 # Endpoint for logging CSP violations
@@ -206,6 +219,25 @@ def logout():
     app.logger.info(f"User {session.get('email')} logged out")
     session.clear()
     return redirect("/")
+
+
+def _to_svg_point(start_pos, predicted_finish):
+    x = 20 + ((start_pos - 1) / 39) * 480
+    y = 90 - ((predicted_finish - 1) / 39) * 70
+    return f"{x:.2f},{y:.2f}"
+
+
+def _build_curve_points(manufacturer, track):
+    points = []
+    for grid_pos in range(1, 41):
+        try:
+            pred = float(predict(manufacturer, track, grid_pos))
+            pred = max(1.0, min(40.0, pred))
+            points.append(_to_svg_point(grid_pos, pred))
+        except Exception:
+            # Skip bad points instead of failing the whole request
+            continue
+    return " ".join(points)
 
 
 if __name__ == "__main__":
